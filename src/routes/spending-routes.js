@@ -1,14 +1,17 @@
 const express = require('express')
 const router = express.Router();
+const jwt = require('jsonwebtoken')
 
 const SpendingRepository = require('../repository/spending-repo')
 const Spending = require('../model/spending')
+const authConfig = require('../config/auth.json')
 
 let sRepo = new SpendingRepository()
 
+
 router.get('/', (req, res) => {
-    return res.status(200).json(sRepo.findAll())
-  })
+    return res.status(200).json(req.userId)
+  });
   
   router.get('/:id', (req, res) => {
   
@@ -27,28 +30,20 @@ router.get('/', (req, res) => {
     return res.status(200).json(spending)
   })
   
-  router.post('/', (req, res) => {
-    let u = req.body
-    console.log(u)
-  
-    if(u.id == undefined || u.preco == undefined || u.quantidade == undefined){
-        resp = {
-            status:'ERROR',
-            description: `Espedings must be provided`
-        }
-        return res.status(400).json(resp)
-    } 
-    
-    
-    sRepo.insert(new Spending(u.id, u.preco, u.quantidade))
+  router.post('/', async(req, res) => {
+    try{
+        const spending = await Spending.create(req.body);
 
-    resp = {
-      status:'OK',
-      description: `Post spending ${u.id} with sucess`
-  }
+        const token = jwt.sign({id: spending.id}, authConfig.secret, {
+          expiresIn: 86400
+        })
+    
+        return res.send({spending, token})
+    } catch (err){
+        return res.status(400).send({ error: 'Registration failed'})
+    }
+  });
   
-  return res.status(200).json(resp)
-  })
   
   router.put('/:id', (req, res) => {
   
@@ -100,5 +95,4 @@ router.get('/', (req, res) => {
   return res.status(200).json(resp)
   })
   
-
-  module.exports = router;
+module.exports = app => app.use('/spending', router)
