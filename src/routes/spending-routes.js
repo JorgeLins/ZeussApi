@@ -2,34 +2,30 @@ const express = require('express')
 const router = express.Router();
 const jwt = require('jsonwebtoken')
 
-const SpendingRepository = require('../repository/spending-repo')
 const Spending = require('../model/spending')
 const authConfig = require('../config/auth.json')
 
-let sRepo = new SpendingRepository()
 
+router.get('/', async (req, res) => {
+    try{
+      const spendings = await Spending.find();
 
-router.get('/', (req, res) => {
-    return res.status(200).json(req.userId)
+      return res.status(200).send({ spendings })
+    }catch{
+      return res.status(404).send({ error: 'Spending not found'})
+    }
   });
   
-  router.get('/:id', (req, res) => {
-  
-    let uid = req.params.id
-  
-    spending = sRepo.find(uid)
+  router.get('/:id', async (req, res) => {
+    try{
+      const spendings = await Spending.findById(req.params.id);
 
-    if(spending == undefined){
-        resp = {
-            status:'ERROR',
-            description: `Gasto ${uid} não encontrado.`
-        }
-        return res.status(404).json(resp)
+      return res.status(200).send({ spendings })
+    }catch{
+      return res.status(404).send({ error: 'Spending not found'})
     }
-  
-    return res.status(200).json(spending)
-  })
-  
+  });
+
   router.post('/', async(req, res) => {
     try{
         const spending = await Spending.create(req.body);
@@ -45,54 +41,37 @@ router.get('/', (req, res) => {
   });
   
   
-  router.put('/:id', (req, res) => {
-  
-    let uid = req.params.id
-    let u = req.body
-  
-    spending = sRepo.find(uid)
-  
-    console.log(uid)
+  router.put('/:id', async (req, res) => {
+    try{
 
-    if(spending == undefined){
-        resp = {
-            status:'ERROR',
-            description: `Gasto ${uid} não encontrado.`
-        }
-        return res.status(404).json(resp)
+      const {price , quantity} = req.body;
+
+      const spendings = await Spending.findByIdAndUpdate(req.params.id , {
+        price,
+        quantity
+      }, { new: true});
+
+      console.log(spendings)
+
+      await spendings.save()
+
+      return res.status(200).send({ status: 'Spending updated with sucess' })
+    }catch{
+      return res.status(404).send({ error: 'Spending not found'})
     }
-  
-    spending.preco = u.preco;
-    spending.quantidade = u.quantidade;
-    
 
-    sRepo.update(spending)
-
-  
-    return res.status(200).json(spending)
   })
   
-  router.delete('/:id', (req, res) => {
-  
-    let uid = req.params.id;
-    spending = sRepo.find(uid)
+  router.delete('/:id', async (req, res) => {
+    try{
+      
 
-    if(spending == undefined){
-        resp = {
-            status:'ERROR',
-            description: `Gasto ${uid} não encontrado.`
-        }
-        return res.status(404).json(resp)
+      const spendings = await Spending.findByIdAndDelete(req.params.id);
+
+      return res.status(200).send({ status: 'Spending deleted with sucess' })
+    }catch{
+      return res.status(404).send({ error: 'Spending not found'})
     }
-  
-    sRepo.delete(spending)
-
-    resp = {
-      status:'OK',
-      description: `Spending ${u.id} deleted with sucess`
-  }
-  
-  return res.status(200).json(resp)
-  })
+  });
   
 module.exports = app => app.use('/spending', router)

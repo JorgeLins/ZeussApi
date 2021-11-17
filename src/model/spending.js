@@ -1,6 +1,6 @@
 const mongoose = require('../database/spending-db')
 const moment = require('moment-timezone')
-const dateBrazil = moment().tz("America/Fortaleza").format()
+const dateBrazil = moment.tz(Date.now(),"America/Fortaleza").format()
 
 console.log(dateBrazil)
 
