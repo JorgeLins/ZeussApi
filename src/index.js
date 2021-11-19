@@ -4,8 +4,12 @@ const port = 3000
 
 const spendingRouter = require('./routes/spending-routes')
 require('./database/spending-db')
+const cors = require('cors');
 
-
+app.use(cors({
+  origin: '*'
+}));
+ 
 app.use(express.json());
 
 

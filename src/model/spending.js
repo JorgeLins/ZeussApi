@@ -1,10 +1,14 @@
 const mongoose = require('../database/spending-db')
 const moment = require('moment-timezone')
-const dateBrazil = moment.tz(Date.now(),"America/Fortaleza").format()
+const dateBrazil = moment.tz(Date.now(),"America/Fortaleza")
 
 console.log(dateBrazil)
 
 const SpendgingSchema = new mongoose.Schema({
+    name:{
+        type: String,
+        required: true,
+    },
     price:{
         type: Number,
         required: true,
@@ -19,7 +23,7 @@ const SpendgingSchema = new mongoose.Schema({
     },
     createdAt:{
         type: Date,
-        default: dateBrazil
+        default: Date.now
     }
 })
 

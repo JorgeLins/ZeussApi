@@ -20,6 +20,8 @@ router.get('/', async (req, res) => {
     try{
       const spendings = await Spending.findById(req.params.id);
 
+      const body = req.body
+
       return res.status(200).send({ spendings })
     }catch{
       return res.status(404).send({ error: 'Spending not found'})
@@ -29,12 +31,8 @@ router.get('/', async (req, res) => {
   router.post('/', async(req, res) => {
     try{
         const spending = await Spending.create(req.body);
-
-        const token = jwt.sign({id: spending.id}, authConfig.secret, {
-          expiresIn: 86400
-        })
     
-        return res.send({spending, token})
+        return res.send({spending})
     } catch (err){
         return res.status(400).send({ error: 'Registration failed'})
     }
@@ -47,11 +45,10 @@ router.get('/', async (req, res) => {
       const {price , quantity} = req.body;
 
       const spendings = await Spending.findByIdAndUpdate(req.params.id , {
+        name,
         price,
         quantity
       }, { new: true});
-
-      console.log(spendings)
 
       await spendings.save()
 
@@ -73,5 +70,17 @@ router.get('/', async (req, res) => {
       return res.status(404).send({ error: 'Spending not found'})
     }
   });
+
+  router.delete('/', async (req, res) => {
+    try{
+      const spendings = await Spending.deleteMany();
+
+      return res.status(200).send({ status: 'Spending deleted with sucess' })
+    }catch{
+      return res.status(404).send({ error: 'Spending not found'})
+    }
+  });
+  
+  
   
 module.exports = app => app.use('/spending', router)
