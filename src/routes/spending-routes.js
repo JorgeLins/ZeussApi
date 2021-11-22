@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
   router.put('/:id', async (req, res) => {
     try{
 
-      const {price , quantity} = req.body;
+      const {price , quantity, name} = req.body;
 
       const spendings = await Spending.findByIdAndUpdate(req.params.id , {
         name,
